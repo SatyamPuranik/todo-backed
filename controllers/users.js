@@ -1,49 +1,107 @@
+const User = require('../models/User');
+const ErrorResponse = require('../utilis/errorResponse');
+
 //@desc      Get all users
 //@route     GET /api/v1/users
 //@access    Public
-exports.getUsers = (req, res, next) => {
-  res.status(200).json({
-    success: true,
-    msg: 'Show all Users'
-  });
+exports.getUsers = async (req, res, next) => {
+  try {
+    const users = await User.find();
+    res.status(200).json({
+      success: true,
+      count: users.length,
+      data: users
+    });
+  } catch (error) {
+    next(error);
+  }
 };
 
 //@desc      Get single user
 //@route     GET /api/v1/users/:id
 //@access    Public
-exports.getUser = (req, res, next) => {
-  res.status(200).json({
-    success: true,
-    msg: `Show User ${req.params.id}`
-  });
+exports.getUser = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.params.id);
+
+    if (!user) {
+      return next(
+        new ErrorResponse(`No user found with id ${req.params.id}`, 400)
+      );
+    }
+
+    res.status(200).json({
+      success: true,
+      data: user
+    });
+  } catch (error) {
+    next(new ErrorResponse(`Wrong id : ${req.params.id}`, 400));
+  }
 };
 
 //@desc      Add User
 //@route     POST /api/v1/users
 //@access    Public
-exports.createUser = (req, res, next) => {
-  res.status(200).json({
-    success: true,
-    msg: `Add User`
-  });
+exports.createUser = async (req, res, next) => {
+  try {
+    const user = await User.create(req.body);
+
+    res.status(201).json({
+      success: true,
+      data: user
+    });
+  } catch (error) {
+    next(error);
+  }
 };
 
 //@desc      Update user
 //@route     PUT /api/v1/users/:id
 //@access    Public
-exports.updateUser = (req, res, next) => {
-  res.status(200).json({
-    success: true,
-    msg: `Update User ${req.params.id}`
-  });
+exports.updateUser = async (req, res, next) => {
+  try {
+    let user = await User.findById(req.params.id);
+
+    if (!user) {
+      return next(
+        new ErrorResponse(`No user found with id ${req.params.id}`, 400)
+      );
+    }
+
+    user = await User.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+      runValidators: true
+    });
+
+    res.status(200).json({
+      success: true,
+      data: user
+    });
+  } catch (error) {
+    next(new ErrorResponse(`No user found with id ${req.params.id}`, 400));
+  }
 };
 
 //@desc      Delete user
 //@route     DELETE /api/v1/users/:id
 //@access    Public
-exports.deleteUser = (req, res, next) => {
-  res.status(200).json({
-    success: true,
-    msg: `Delete User ${req.params.id}`
-  });
+exports.deleteUser = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.params.id);
+
+    if (!user) {
+      return next(
+        new ErrorResponse(`No user found with id ${req.params.id}`, 400)
+      );
+    }
+
+    user.remove();
+
+    res.status(200).json({
+      success: true,
+      data: {}
+    });
+  } catch (error) {
+    next(new ErrorResponse(`No user found with id ${req.params.id}`, 400));
+  }
 };

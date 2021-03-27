@@ -13,12 +13,7 @@ exports.register = async (req, res, next) => {
     password
   });
 
-  const token = user.getSignedJwtToken();
-
-  res.status(200).json({
-    success: true,
-    token
-  });
+  sendTokenResponse(user, 200, res);
 };
 
 //@desc      Login user
@@ -43,10 +38,35 @@ exports.login = async (req, res, next) => {
     return next(new ErrorResponse('Invalid Credentials', 401));
   }
 
-  const token = user.getSignedJwtToken();
+  sendTokenResponse(user, 200, res);
+};
 
+//@desc      Get logged in user
+//@route     POST /api/v1/auth/me
+//@access    Private
+exports.getMe = async (req, res, next) => {
+  const user = await User.findById(req.user.id);
   res.status(200).json({
     success: true,
-    token
+    user
   });
+};
+
+const sendTokenResponse = (user, statusCode, res) => {
+  const token = user.getSignedJwtToken();
+  const options = {
+    expires: new Date(
+      Date.now() + process.env.JWT_COOKIE_EXPIRE * 24 * 60 * 60 * 1000
+    ),
+    httpOnly: true
+  };
+
+  if (process.env.NODE_ENV === 'production') {
+    options.secrue = true;
+  }
+
+  res
+    .status(statusCode)
+    .cookie('token', token, options)
+    .json({ success: true, token });
 };

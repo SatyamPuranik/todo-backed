@@ -19,8 +19,24 @@ const UserSchema = new mongoose.Schema({
     minlength: 6,
     select: false
   },
-  resetPasswordToken: String,
-  resetPasswordExpire: Date,
+  resetPasswordQuestion: {
+    type: String,
+    required: [
+      true,
+      'Please add a question. This question will be asked if you forget your password.'
+    ],
+    select: false
+  },
+  resetPasswordAnswer: {
+    type: String,
+    required: [true, 'Please add answer to your security question.'],
+    select: false
+  },
+  role: {
+    type: String,
+    enum: ['user', 'admin'],
+    default: 'user'
+  },
   createdAt: {
     type: Date,
     default: Date.now

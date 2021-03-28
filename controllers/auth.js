@@ -5,40 +5,60 @@ const ErrorResponse = require('../utilis/errorResponse');
 //@route     POST /api/v1/auth/register
 //@access    Public
 exports.register = async (req, res, next) => {
-  const { name, email, password } = req.body;
+  try {
+    const {
+      name,
+      email,
+      password,
+      resetPasswordQuestion,
+      resetPasswordAnswer,
+      role
+    } = req.body;
 
-  const user = await User.create({
-    name,
-    email,
-    password
-  });
+    const user = await User.create({
+      name,
+      email,
+      password,
+      resetPasswordQuestion,
+      resetPasswordAnswer,
+      role
+    });
 
-  sendTokenResponse(user, 200, res);
+    sendTokenResponse(user, 200, res);
+  } catch (error) {
+    next(error);
+  }
 };
 
 //@desc      Login user
 //@route     POST /api/v1/auth/login
 //@access    Public
 exports.login = async (req, res, next) => {
-  const { email, password } = req.body;
+  try {
+    const { email, password } = req.body;
 
-  if (!email || !password) {
-    return next(new ErrorResponse('Please provide an email and password', 400));
+    if (!email || !password) {
+      return next(
+        new ErrorResponse('Please provide an email and password', 400)
+      );
+    }
+
+    const user = await User.findOne({ email }).select('+password');
+
+    if (!user) {
+      return next(new ErrorResponse('Invalid Credentials', 401));
+    }
+
+    const isMatch = await user.matchPassword(password);
+
+    if (!isMatch) {
+      return next(new ErrorResponse('Invalid Credentials', 401));
+    }
+
+    sendTokenResponse(user, 200, res);
+  } catch (error) {
+    next(error);
   }
-
-  const user = await User.findOne({ email }).select('+password');
-
-  if (!user) {
-    return next(new ErrorResponse('Invalid Credentials', 401));
-  }
-
-  const isMatch = await user.matchPassword(password);
-
-  if (!isMatch) {
-    return next(new ErrorResponse('Invalid Credentials', 401));
-  }
-
-  sendTokenResponse(user, 200, res);
 };
 
 //@desc      Get logged in user

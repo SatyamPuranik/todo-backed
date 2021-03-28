@@ -3,7 +3,7 @@ const ErrorResponse = require('../utilis/errorResponse');
 
 //@desc      Get all users
 //@route     GET /api/v1/users
-//@access    Public
+//@access    Private/Admin
 exports.getUsers = async (req, res, next) => {
   try {
     const users = await User.find();
@@ -19,7 +19,7 @@ exports.getUsers = async (req, res, next) => {
 
 //@desc      Get single user
 //@route     GET /api/v1/users/:id
-//@access    Public
+//@access    Private/Admin
 exports.getUser = async (req, res, next) => {
   try {
     const user = await User.findById(req.params.id);
@@ -41,7 +41,7 @@ exports.getUser = async (req, res, next) => {
 
 //@desc      Add User
 //@route     POST /api/v1/users
-//@access    Public
+//@access    Private/Admin
 exports.createUser = async (req, res, next) => {
   try {
     const user = await User.create(req.body);
@@ -57,7 +57,7 @@ exports.createUser = async (req, res, next) => {
 
 //@desc      Update user
 //@route     PUT /api/v1/users/:id
-//@access    Public
+//@access    Private/Admin
 exports.updateUser = async (req, res, next) => {
   try {
     let user = await User.findById(req.params.id);
@@ -84,7 +84,7 @@ exports.updateUser = async (req, res, next) => {
 
 //@desc      Delete user
 //@route     DELETE /api/v1/users/:id
-//@access    Public
+//@access    Private/Admin
 exports.deleteUser = async (req, res, next) => {
   try {
     const user = await User.findById(req.params.id);

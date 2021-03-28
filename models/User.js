@@ -24,8 +24,7 @@ const UserSchema = new mongoose.Schema({
     required: [
       true,
       'Please add a question. This question will be asked if you forget your password.'
-    ],
-    select: false
+    ]
   },
   resetPasswordAnswer: {
     type: String,
@@ -35,7 +34,8 @@ const UserSchema = new mongoose.Schema({
   role: {
     type: String,
     enum: ['user', 'admin'],
-    default: 'user'
+    default: 'user',
+    select: false
   },
   createdAt: {
     type: Date,
@@ -44,8 +44,19 @@ const UserSchema = new mongoose.Schema({
 });
 
 UserSchema.pre('save', async function (next) {
+  if (!this.isModified('password')) {
+    next();
+  }
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
+});
+
+UserSchema.pre('save', async function (next) {
+  if (!this.isModified('resetPasswordAnswer')) {
+    next();
+  }
+  const salt = await bcrypt.genSalt(10);
+  this.resetPasswordAnswer = await bcrypt.hash(this.resetPasswordAnswer, salt);
 });
 
 UserSchema.methods.getSignedJwtToken = function () {
@@ -56,6 +67,10 @@ UserSchema.methods.getSignedJwtToken = function () {
 
 UserSchema.methods.matchPassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
+};
+
+UserSchema.methods.matchAnswer = async function (enteredAnswer) {
+  return await bcrypt.compare(enteredAnswer, this.resetPasswordAnswer);
 };
 
 module.exports = mongoose.model('User', UserSchema);

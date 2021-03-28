@@ -36,7 +36,7 @@ exports.protect = async (req, res, next) => {
 };
 
 exports.authorize = async (req, res, next) => {
-  const user = await User.findById(req.user._id);
+  const user = await User.findById(req.user.id).select('+role');
 
   if (user.role === 'admin') {
     next();

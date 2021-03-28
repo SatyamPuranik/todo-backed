@@ -1,3 +1,4 @@
+const { findById } = require('../models/User');
 const User = require('../models/User');
 const ErrorResponse = require('../utilis/errorResponse');
 
@@ -69,6 +70,81 @@ exports.getMe = async (req, res, next) => {
   res.status(200).json({
     success: true,
     user
+  });
+};
+
+//@desc      Forgot Password
+//@route     PUT /api/v1/auth/forgotpassword
+//@access    Public
+exports.forgotPassword = async (req, res, next) => {
+  try {
+    const { email, answer, newPassword } = req.body;
+
+    const user = await User.findOne({ email }).select(
+      '+password resetPasswordAnswer'
+    );
+
+    const isMatch = await user.matchAnswer(answer);
+
+    if (!isMatch) {
+      return next(new ErrorResponse('Wrong Answer', 401));
+    }
+
+    user.password = newPassword;
+
+    await user.save();
+
+    sendTokenResponse(user, 200, res);
+  } catch (error) {
+    next(error);
+  }
+};
+
+//@desc      Update user details
+//@route     PUT /api/v1/auth/updatedetails
+//@access    Private
+exports.updateDetails = async (req, res, next) => {
+  let user = await User.findById(req.user.id).select('+resetPasswordAnswer');
+
+  const fieldsToUpdate = {
+    name: req.body.name || user.name,
+    email: req.body.email || user.email,
+    resetPasswordQuestion:
+      req.body.resetPasswordQuestion || user.resetPasswordQuestion,
+    resetPasswordAnswer:
+      req.body.resetPasswordAnswer || user.resetPasswordAnswer
+  };
+
+  user = await User.findByIdAndUpdate(req.user.id, fieldsToUpdate, {
+    new: true,
+    runValidators: true
+  });
+
+  res.status(200).json({
+    success: true,
+    msg: 'Details updated successfully'
+  });
+};
+
+//@desc      Update password
+//@route     PUT /api/v1/auth/updatepassword
+//@access    Private
+exports.updatePassword = async (req, res, next) => {
+  let user = await User.findById(req.user.id).select('+password');
+
+  const isMatch = await user.matchPassword(req.body.password);
+
+  if (!isMatch) {
+    return next(new ErrorResponse('Invalid Password', 401));
+  }
+
+  user.password = req.body.newPassword;
+
+  await user.save();
+
+  res.status(200).json({
+    success: true,
+    msg: 'Password updated successfully'
   });
 };
 

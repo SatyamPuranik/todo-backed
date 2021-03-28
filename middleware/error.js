@@ -23,6 +23,12 @@ const errorHandler = (error, req, res, next) => {
     err = new ErrorResponse(message, 400);
   }
 
+  if (error.name === 'TypeError') {
+    const message = 'Invaild Email';
+    console.log(error);
+    err = new ErrorResponse(message, 400);
+  }
+
   res.status(err.statusCode || 500).json({
     success: false,
     error: err.message || 'Server Error'

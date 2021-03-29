@@ -75,7 +75,7 @@ exports.updateTodo = async (req, res, next) => {
 
     const fieldsToUpdate = {
       title: req.body.title || todo.title,
-      email: req.body.description || todo.description,
+      description: req.body.description || todo.description,
       importance: req.body.importance || todo.importance
     };
 

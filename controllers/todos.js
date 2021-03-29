@@ -67,11 +67,11 @@ exports.updateTodo = async (req, res, next) => {
   try {
     const todo = await Todo.findById(req.params.id);
 
-    if (!todo) {
-      return next(
-        new ErrorResponse(`No todo found with id ${req.params.id}`, 400)
-      );
-    }
+    // if (!todo) {
+    //   return next(
+    //     new ErrorResponse(`No todo found with id ${req.params.id}`, 400)
+    //   );
+    // }
 
     const fieldsToUpdate = {
       title: req.body.title || todo.title,

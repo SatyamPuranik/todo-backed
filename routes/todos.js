@@ -3,10 +3,8 @@ const router = express.Router();
 
 const { protect } = require('../middleware/auth');
 
-const {} = require('../controllers/todos');
+const { getTodos, addTodo } = require('../controllers/todos');
 
-router.route('/').get(protect).post(protect);
-
-router.route('/:id').get(protect).put(protect).delete(protect);
+router.route('/').get(protect, getTodos).post(protect, addTodo);
 
 module.exports = router;
